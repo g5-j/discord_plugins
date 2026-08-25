@@ -1,18 +1,20 @@
 {
-  "name": "SilentEdit",
-  "displayName": "Silent Edit",
+  "spec": 3,
+  "type": "plugin",
+  "id": "loststr.silentedit",
   "version": "1.0.0",
-  "description": "\"Silently\" edit a message without showing the edit tag and bypass Vencord's message logger.",
-  "main": "index.js",
-  "author": {
-    "name": "Aurick",
-    "id": "1348025017233047634"
+  "display": {
+    "name": "SilentEdit",
+    "description": "\"Silently\" edit a message without showing the edit tag and bypass Vencord's message logger.",
+    "authors": [
+      {
+        "name": "Aurick",
+        "id": "1348025017233047634"
+      }
+    ]
   },
-  "tags": [
-    "Chat",
-    "Privacy"
-  ],
-  "dependencies": [
-    "MessagePopoverAPI"
-  ]
+  "main": "index.js",
+  "extras": {
+    "bunny": {}
+  }
 }
