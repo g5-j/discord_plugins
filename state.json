@@ -1,1 +1,0 @@
-{"pylixonly.hidechatbutton":{"id":"pylixonly.hidechatbutton","repository":"https://github.com/pylixonly/bunny-plugins.git","commit":"71d0c37ece2cc0a67b5ba59b4de4e4a6107eadcf","command":"pnpm i --recursive && pnpm build","authorId":"82711525"}}
