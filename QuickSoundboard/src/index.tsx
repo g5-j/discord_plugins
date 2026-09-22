@@ -3,8 +3,6 @@ import { FluxDispatcher, React, ReactNative } from "@vendetta/metro/common";
 import { storage } from "@vendetta/plugin";
 import { logger } from "@vendetta";
 
-const { ScrollView, View, Text, TextInput, TouchableOpacity } = ReactNative;
-
 export interface SoundItem {
   soundId: string;
   name: string;
@@ -16,7 +14,7 @@ const typedStorage = storage as typeof storage & {
   favorites: SoundItem[];
 };
 
-// ==================== الدوال المساعدة (Utils) ====================
+// ==================== الدوال المساعدة ====================
 
 export function getCurrentVoiceChannelId(): string | null {
   try {
@@ -55,9 +53,12 @@ export function playSound(sound: SoundItem): boolean {
   }
 }
 
-// ==================== واجهة الإعدادات (Settings) ====================
+// ==================== واجهة الإعدادات (Lazy Loaded) ====================
 
 function Settings() {
+  // جلب مكونات ReactNative بأمان داخل الدالة لتجنب أخطاء الإقلاع في Revenge
+  const { ScrollView, View, Text, TextInput, TouchableOpacity } = ReactNative;
+
   typedStorage.enabled ??= true;
   typedStorage.favorites ??= [];
 
@@ -143,7 +144,7 @@ function Settings() {
   );
 }
 
-// ==================== إقلاع وتصدير البلوقن (Entry Point) ====================
+// ==================== إقلاع وتصدير البلوقن ====================
 
 function onLoad() {
   logger.log("[Quick Soundboard] Loaded!");
