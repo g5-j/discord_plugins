@@ -26,103 +26,43 @@ var QuickSoundboard = (() => {
   // QuickSoundboard/src/index.ts
   var index_exports = {};
   __export(index_exports, {
-    default: () => index_default
+    default: () => index_default,
+    playSound: () => playSound
   });
-  var import_plugin2 = __require("@vendetta/plugin");
-  var import_vendetta = __require("@vendetta");
-
-  // QuickSoundboard/src/Settings.tsx
-  var import_common = __require("@vendetta/metro/common");
-  var import_components = __require("@vendetta/ui/components");
-  var import_storage = __require("@vendetta/storage");
-  var import_plugin = __require("@vendetta/plugin");
-  var { ScrollView, View } = import_common.ReactNative;
-  var { FormSection, FormInput, FormSwitchRow, FormText } = import_components.Forms;
-  var typedStorage = import_plugin.storage;
-  function Settings() {
-    (0, import_storage.useProxy)(typedStorage);
-    typedStorage.enabled ??= true;
-    typedStorage.favorites ??= [];
-    return /* @__PURE__ */ import_common.React.createElement(ScrollView, { style: { paddingBottom: 24 } }, /* @__PURE__ */ import_common.React.createElement(View, { style: { padding: 16 } }, /* @__PURE__ */ import_common.React.createElement(FormSection, { title: "Quick Soundboard Settings" }, /* @__PURE__ */ import_common.React.createElement(
-      FormSwitchRow,
-      {
-        label: "Enable Overlay Hotkeys",
-        subLabel: "Show quick sound options when connected to voice",
-        value: typedStorage.enabled,
-        onValueChange: (v) => {
-          typedStorage.enabled = v;
-        }
-      }
-    )), /* @__PURE__ */ import_common.React.createElement(FormSection, { title: `Favorite Sounds (Configured: ${typedStorage.favorites.length})` }, /* @__PURE__ */ import_common.React.createElement(FormText, { style: { marginBottom: 12 } }, "Add Sound IDs below to quickly trigger them in voice channels."), /* @__PURE__ */ import_common.React.createElement(
-      FormInput,
-      {
-        title: "Add Sound ID",
-        placeholder: "e.g. 1054951789318909972",
-        keyboardType: "numeric",
-        onSubmitEditing: (e) => {
-          const text = e.nativeEvent.text;
-          if (text) {
-            typedStorage.favorites.push({
-              soundId: text,
-              name: `Sound #${text.slice(-4)}`
-            });
-          }
-        }
-      }
-    ))));
-  }
-
-  // QuickSoundboard/src/utils.ts
   var import_metro = __require("@vendetta/metro");
-  var import_common2 = __require("@vendetta/metro/common");
-  var getVoiceStateStore = () => (0, import_metro.findByProps)("getVoiceChannelId");
-  var getChannelStore = () => (0, import_metro.findByProps)("getChannel");
+  var import_common = __require("@vendetta/metro/common");
+  var import_plugin = __require("@vendetta/plugin");
+  var import_vendetta = __require("@vendetta");
+  var typedStorage = import_plugin.storage;
   function playSound(sound) {
-    const VoiceStateStore = getVoiceStateStore();
-    const ChannelStore = getChannelStore();
-    const currentChannelId = VoiceStateStore?.getVoiceChannelId();
-    if (!currentChannelId) return false;
-    const channel = ChannelStore?.getChannel(currentChannelId);
-    const guildId = channel?.guild_id ?? sound.guildId ?? "0";
-    import_common2.FluxDispatcher.dispatch({
-      type: "GUILD_SOUNDBOARD_SOUND_PLAY_START",
-      soundId: sound.soundId,
-      channelId: currentChannelId,
-      guildId
-    });
-    return true;
+    try {
+      const VoiceStateStore = (0, import_metro.findByProps)("getVoiceChannelId");
+      const ChannelStore = (0, import_metro.findByProps)("getChannel");
+      const currentChannelId = VoiceStateStore?.getVoiceChannelId();
+      if (!currentChannelId) return false;
+      const channel = ChannelStore?.getChannel(currentChannelId);
+      const guildId = channel?.guild_id ?? sound.guildId ?? "0";
+      import_common.FluxDispatcher.dispatch({
+        type: "GUILD_SOUNDBOARD_SOUND_PLAY_START",
+        soundId: sound.soundId,
+        channelId: currentChannelId,
+        guildId
+      });
+      return true;
+    } catch (e) {
+      import_vendetta.logger.error("[Quick Soundboard] Failed to play sound:", e);
+      return false;
+    }
   }
-
-  // QuickSoundboard/src/index.ts
-  var typedStorage2 = import_plugin2.storage;
   var index_default = {
     onLoad() {
       import_vendetta.logger.log("[Quick Soundboard] Plugin Loaded Successfully.");
-      typedStorage2.enabled ??= true;
-      typedStorage2.favorites ??= [];
+      typedStorage.enabled ??= true;
+      typedStorage.favorites ??= [];
     },
     onUnload() {
       import_vendetta.logger.log("[Quick Soundboard] Plugin Unloaded.");
-    },
-    triggerQuickSound(index = 0) {
-      if (!typedStorage2.enabled) return;
-      const VoiceStateStore = getVoiceStateStore();
-      const currentChannel = VoiceStateStore?.getVoiceChannelId();
-      if (!currentChannel) {
-        import_vendetta.logger.warn("[Quick Soundboard] Not connected to any voice channel.");
-        return;
-      }
-      const sound = typedStorage2.favorites[index];
-      if (sound) {
-        const success = playSound(sound);
-        if (success) {
-          import_vendetta.logger.log(`[Quick Soundboard] Playing sound: ${sound.name}`);
-        }
-      } else {
-        import_vendetta.logger.warn("[Quick Soundboard] No favorite sound configured at index: " + index);
-      }
-    },
-    settings: Settings
+    }
   };
   return __toCommonJS(index_exports);
 })();
