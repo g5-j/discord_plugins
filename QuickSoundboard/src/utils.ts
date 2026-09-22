@@ -1,10 +1,6 @@
 import { findByProps } from "@vendetta/metro";
 import { FluxDispatcher } from "@vendetta/metro/common";
 
-export const SoundboardStore = findByProps("getSounds", "getSoundById");
-export const VoiceStateStore = findByProps("getVoiceChannelId");
-export const ChannelStore = findByProps("getChannel");
-
 export interface SoundItem {
   soundId: string;
   name: string;
@@ -12,11 +8,18 @@ export interface SoundItem {
   guildId?: string;
 }
 
+// جلب الموديلات بأمان عند طلبها
+export const getVoiceStateStore = () => findByProps("getVoiceChannelId");
+export const getChannelStore = () => findByProps("getChannel");
+
 export function playSound(sound: SoundItem) {
-  const currentChannelId = VoiceStateStore.getVoiceChannelId();
+  const VoiceStateStore = getVoiceStateStore();
+  const ChannelStore = getChannelStore();
+
+  const currentChannelId = VoiceStateStore?.getVoiceChannelId();
   if (!currentChannelId) return false;
 
-  const channel = ChannelStore.getChannel(currentChannelId);
+  const channel = ChannelStore?.getChannel(currentChannelId);
   const guildId = channel?.guild_id ?? sound.guildId ?? "0";
 
   FluxDispatcher.dispatch({
