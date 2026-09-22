@@ -26,13 +26,13 @@ export default function Settings() {
             label="Enable Overlay Hotkeys"
             subLabel="Show quick sound options when connected to voice"
             value={typedStorage.enabled}
-            onValueChange={(v) => {
+            onValueChange={(v: boolean) => {
               typedStorage.enabled = v;
             }}
           />
         </FormSection>
 
-        <FormSection title="Favorite Sounds (Configured: {typedStorage.favorites.length})">
+        <FormSection title={`Favorite Sounds (Configured: ${typedStorage.favorites.length})`}>
           <FormText style={{ marginBottom: 12 }}>
             Add Sound IDs below to quickly trigger them in voice channels.
           </FormText>
@@ -40,7 +40,7 @@ export default function Settings() {
             title="Add Sound ID"
             placeholder="e.g. 1054951789318909972"
             keyboardType="numeric"
-            onSubmitEditing={(e) => {
+            onSubmitEditing={(e: any) => {
               const text = e.nativeEvent.text;
               if (text) {
                 typedStorage.favorites.push({
