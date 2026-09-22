@@ -10,5 +10,6 @@
   "main": "index.js",
   "vendetta": {
     "icon": "ic_audio_channel"
-  }
+  },
+  "hash": "fdb5b221dc8aafdcd87bfae108092bfb8bba6ff1b2ba0a7005facea0ea5698b1"
 }
