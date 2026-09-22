@@ -30,7 +30,7 @@ jobs:
           esbuild QuickSoundboard/src/index.ts \
             --bundle \
             --outfile=dist/QuickSoundboard/index.js \
-            --format=iife \
+            --format=cjs \
             --global-name=QuickSoundboard \
             --target=es2021 \
             --external:@vendetta \
