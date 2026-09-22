@@ -16,22 +16,53 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// QuickSoundboard/src/index.ts
+// QuickSoundboard/src/index.tsx
 var index_exports = {};
 __export(index_exports, {
+  getCurrentVoiceChannelId: () => getCurrentVoiceChannelId,
   playSound: () => playSound
 });
 module.exports = __toCommonJS(index_exports);
 var import_metro = require("@vendetta/metro");
-var import_common2 = require("@vendetta/metro/common");
-var import_plugin2 = require("@vendetta/plugin");
-var import_vendetta = require("@vendetta");
-
-// QuickSoundboard/src/Settings.tsx
 var import_common = require("@vendetta/metro/common");
 var import_plugin = require("@vendetta/plugin");
+var import_vendetta = require("@vendetta");
 var { ScrollView, View, Text, TextInput, TouchableOpacity } = import_common.ReactNative;
 var typedStorage = import_plugin.storage;
+function getCurrentVoiceChannelId() {
+  var _a;
+  try {
+    const VoiceStateStore = (0, import_metro.findByProps)("getVoiceChannelId");
+    return (_a = VoiceStateStore == null ? void 0 : VoiceStateStore.getVoiceChannelId()) != null ? _a : null;
+  } catch (e) {
+    import_vendetta.logger.error("[Quick Soundboard] Error fetching voice channel:", e);
+    return null;
+  }
+}
+function playSound(sound) {
+  var _a, _b;
+  try {
+    const currentChannelId = getCurrentVoiceChannelId();
+    if (!currentChannelId) {
+      import_vendetta.logger.warn("[Quick Soundboard] You must be in a voice channel!");
+      return false;
+    }
+    const ChannelStore = (0, import_metro.findByProps)("getChannel");
+    const channel = ChannelStore == null ? void 0 : ChannelStore.getChannel(currentChannelId);
+    const guildId = (_b = (_a = channel == null ? void 0 : channel.guild_id) != null ? _a : sound.guildId) != null ? _b : "0";
+    import_common.FluxDispatcher.dispatch({
+      type: "GUILD_SOUNDBOARD_SOUND_PLAY_START",
+      soundId: sound.soundId,
+      channelId: currentChannelId,
+      guildId
+    });
+    import_vendetta.logger.log(`[Quick Soundboard] Playing sound: ${sound.name}`);
+    return true;
+  } catch (e) {
+    import_vendetta.logger.error("[Quick Soundboard] Failed to play sound:", e);
+    return false;
+  }
+}
 function Settings() {
   var _a, _b;
   (_a = typedStorage.enabled) != null ? _a : typedStorage.enabled = true;
@@ -99,46 +130,18 @@ function Settings() {
     /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontWeight: "bold" } }, "\u2715")
   ))));
 }
-
-// QuickSoundboard/src/index.ts
-var typedStorage2 = import_plugin2.storage;
-function playSound(sound) {
-  var _a, _b;
-  try {
-    const VoiceStateStore = (0, import_metro.findByProps)("getVoiceChannelId");
-    const ChannelStore = (0, import_metro.findByProps)("getChannel");
-    const currentChannelId = VoiceStateStore == null ? void 0 : VoiceStateStore.getVoiceChannelId();
-    if (!currentChannelId) {
-      import_vendetta.logger.warn("[Quick Soundboard] You must be in a voice channel!");
-      return false;
-    }
-    const channel = ChannelStore == null ? void 0 : ChannelStore.getChannel(currentChannelId);
-    const guildId = (_b = (_a = channel == null ? void 0 : channel.guild_id) != null ? _a : sound.guildId) != null ? _b : "0";
-    import_common2.FluxDispatcher.dispatch({
-      type: "GUILD_SOUNDBOARD_SOUND_PLAY_START",
-      soundId: sound.soundId,
-      channelId: currentChannelId,
-      guildId
-    });
-    return true;
-  } catch (e) {
-    import_vendetta.logger.error("[Quick Soundboard] Failed to play sound:", e);
-    return false;
-  }
-}
 function onLoad() {
   var _a, _b;
-  import_vendetta.logger.log("[Quick Soundboard] Plugin Loaded Successfully.");
-  (_a = typedStorage2.enabled) != null ? _a : typedStorage2.enabled = true;
-  (_b = typedStorage2.favorites) != null ? _b : typedStorage2.favorites = [];
+  import_vendetta.logger.log("[Quick Soundboard] Loaded!");
+  (_a = typedStorage.enabled) != null ? _a : typedStorage.enabled = true;
+  (_b = typedStorage.favorites) != null ? _b : typedStorage.favorites = [];
 }
 function onUnload() {
-  import_vendetta.logger.log("[Quick Soundboard] Plugin Unloaded.");
+  import_vendetta.logger.log("[Quick Soundboard] Unloaded!");
 }
 module.exports = {
   onLoad,
   onUnload,
   playSound,
-  // استخدام دالة إرجاع حرة لمنع كراش التفعيل في Revenge
   settings: () => Settings()
 };
