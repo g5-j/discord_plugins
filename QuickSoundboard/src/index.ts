@@ -57,5 +57,6 @@ module.exports = {
   onLoad,
   onUnload,
   playSound,
-  settings: Settings
+  // استخدام دالة إرجاع حرة لمنع كراش التفعيل في Revenge
+  settings: () => Settings()
 };
