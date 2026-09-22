@@ -53,10 +53,9 @@ export function playSound(sound: SoundItem): boolean {
   }
 }
 
-// ==================== واجهة الإعدادات (Lazy Loaded) ====================
+// ==================== واجهة الإعدادات المصممة لـ Revenge ====================
 
-function Settings() {
-  // جلب مكونات ReactNative بأمان داخل الدالة لتجنب أخطاء الإقلاع في Revenge
+export function Settings() {
   const { ScrollView, View, Text, TextInput, TouchableOpacity } = ReactNative;
 
   typedStorage.enabled ??= true;
@@ -77,8 +76,8 @@ function Settings() {
 
   return (
     <ScrollView style={{ padding: 16, backgroundColor: "#2f3136" }}>
-      <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 16 }}>
-        Quick Soundboard (Revenge)
+      <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold", marginBottom: 16 }}>
+        Quick Soundboard Settings
       </Text>
 
       <View style={{ marginBottom: 20 }}>
@@ -86,7 +85,7 @@ function Settings() {
         <TextInput
           style={{
             backgroundColor: "#202225",
-            color: "#fff",
+            color: "#ffffff",
             padding: 12,
             borderRadius: 8,
             marginBottom: 10,
@@ -108,11 +107,11 @@ function Settings() {
           }}
           onPress={handleAddSound}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>+ Add Sound</Text>
+          <Text style={{ color: "#ffffff", fontWeight: "bold" }}>+ Add Sound</Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
+      <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
         Favorites ({typedStorage.favorites.length})
       </Text>
 
@@ -128,7 +127,7 @@ function Settings() {
             }}
             onPress={() => playSound(sound)}
           >
-            <Text style={{ color: "#fff", fontWeight: "600" }}>▶ {sound.name}</Text>
+            <Text style={{ color: "#ffffff", fontWeight: "600" }}>▶ {sound.name}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{ backgroundColor: "#ed4245", padding: 12, borderRadius: 8 }}
@@ -136,7 +135,7 @@ function Settings() {
               typedStorage.favorites.splice(index, 1);
             }}
           >
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>✕</Text>
+            <Text style={{ color: "#ffffff", fontWeight: "bold" }}>✕</Text>
           </TouchableOpacity>
         </View>
       ))}
@@ -146,19 +145,19 @@ function Settings() {
 
 // ==================== إقلاع وتصدير البلوقن ====================
 
-function onLoad() {
-  logger.log("[Quick Soundboard] Loaded!");
+export function onLoad() {
+  logger.log("[Quick Soundboard] Plugin Loaded Successfully!");
   typedStorage.enabled ??= true;
   typedStorage.favorites ??= [];
 }
 
-function onUnload() {
-  logger.log("[Quick Soundboard] Unloaded!");
+export function onUnload() {
+  logger.log("[Quick Soundboard] Plugin Unloaded!");
 }
 
 module.exports = {
   onLoad,
   onUnload,
   playSound,
-  settings: () => Settings()
+  Settings
 };
