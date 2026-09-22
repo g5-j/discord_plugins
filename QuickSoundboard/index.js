@@ -75,13 +75,14 @@ var QuickSoundboard = (() => {
   // QuickSoundboard/src/utils.ts
   var import_metro = __require("@vendetta/metro");
   var import_common2 = __require("@vendetta/metro/common");
-  var SoundboardStore = (0, import_metro.findByProps)("getSounds", "getSoundById");
-  var VoiceStateStore = (0, import_metro.findByProps)("getVoiceChannelId");
-  var ChannelStore = (0, import_metro.findByProps)("getChannel");
+  var getVoiceStateStore = () => (0, import_metro.findByProps)("getVoiceChannelId");
+  var getChannelStore = () => (0, import_metro.findByProps)("getChannel");
   function playSound(sound) {
-    const currentChannelId = VoiceStateStore.getVoiceChannelId();
+    const VoiceStateStore = getVoiceStateStore();
+    const ChannelStore = getChannelStore();
+    const currentChannelId = VoiceStateStore?.getVoiceChannelId();
     if (!currentChannelId) return false;
-    const channel = ChannelStore.getChannel(currentChannelId);
+    const channel = ChannelStore?.getChannel(currentChannelId);
     const guildId = channel?.guild_id ?? sound.guildId ?? "0";
     import_common2.FluxDispatcher.dispatch({
       type: "GUILD_SOUNDBOARD_SOUND_PLAY_START",
@@ -103,10 +104,10 @@ var QuickSoundboard = (() => {
     onUnload() {
       import_vendetta.logger.log("[Quick Soundboard] Plugin Unloaded.");
     },
-    // دالة برمجية لاستدعاء الصوت الأول المفضل
     triggerQuickSound(index = 0) {
       if (!typedStorage2.enabled) return;
-      const currentChannel = VoiceStateStore.getVoiceChannelId();
+      const VoiceStateStore = getVoiceStateStore();
+      const currentChannel = VoiceStateStore?.getVoiceChannelId();
       if (!currentChannel) {
         import_vendetta.logger.warn("[Quick Soundboard] Not connected to any voice channel.");
         return;
