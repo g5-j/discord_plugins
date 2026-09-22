@@ -23,15 +23,15 @@ jobs:
       - name: Install esbuild
         run: npm install -g esbuild
 
-      - name: Build QuickSoundboard Plugin
+      - name: Build Plugin
         run: |
-          # إنشاء مجلد dist والإخراج المطلوب
-          mkdir -p dist/QuickSoundboard
+          # إنشاء مجلد dist
+          mkdir -p dist
           
-          # تجميع ملفات TypeScript إلى index.js
-          esbuild QuickSoundboard/src/index.ts \
+          # تجميع ملفات TypeScript مباشرة إلى dist/index.js
+          esbuild src/index.ts \
             --bundle \
-            --outfile=dist/QuickSoundboard/index.js \
+            --outfile=dist/index.js \
             --format=esm \
             --target=es2021 \
             --external:@vendetta/* \
@@ -39,9 +39,9 @@ jobs:
             --external:react \
             --external:react-native
 
-          # نسخ ملف manifest وتحديث الإدخال ليكون index.js
-          cp QuickSoundboard/manifest.json dist/QuickSoundboard/manifest.json
-          sed -i 's/"src\/index.ts"/"index.js"/g' dist/QuickSoundboard/manifest.json
+          # نسخ manifest وتعديل المسار
+          cp manifest.json dist/manifest.json
+          sed -i 's/"src\/index.ts"/"index.js"/g' dist/manifest.json
 
       - name: Build 404 page
         run: |
