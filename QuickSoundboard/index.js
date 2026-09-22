@@ -53,7 +53,7 @@ var QuickSoundboard = (() => {
           typedStorage.enabled = v;
         }
       }
-    )), /* @__PURE__ */ import_common.React.createElement(FormSection, { title: "Favorite Sounds (Configured: {typedStorage.favorites.length})" }, /* @__PURE__ */ import_common.React.createElement(FormText, { style: { marginBottom: 12 } }, "Add Sound IDs below to quickly trigger them in voice channels."), /* @__PURE__ */ import_common.React.createElement(
+    )), /* @__PURE__ */ import_common.React.createElement(FormSection, { title: `Favorite Sounds (Configured: ${typedStorage.favorites.length})` }, /* @__PURE__ */ import_common.React.createElement(FormText, { style: { marginBottom: 12 } }, "Add Sound IDs below to quickly trigger them in voice channels."), /* @__PURE__ */ import_common.React.createElement(
       FormInput,
       {
         title: "Add Sound ID",
