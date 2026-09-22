@@ -19,7 +19,10 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // QuickSoundboard/src/index.tsx
 var index_exports = {};
 __export(index_exports, {
+  Settings: () => Settings,
   getCurrentVoiceChannelId: () => getCurrentVoiceChannelId,
+  onLoad: () => onLoad,
+  onUnload: () => onUnload,
   playSound: () => playSound
 });
 module.exports = __toCommonJS(index_exports);
@@ -76,12 +79,12 @@ function Settings() {
     });
     setSoundIdInput("");
   };
-  return /* @__PURE__ */ import_common.React.createElement(ScrollView, { style: { padding: 16, backgroundColor: "#2f3136" } }, /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 16 } }, "Quick Soundboard (Revenge)"), /* @__PURE__ */ import_common.React.createElement(View, { style: { marginBottom: 20 } }, /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#b9bbbe", fontSize: 14, marginBottom: 8 } }, "Add Sound ID:"), /* @__PURE__ */ import_common.React.createElement(
+  return /* @__PURE__ */ import_common.React.createElement(ScrollView, { style: { padding: 16, backgroundColor: "#2f3136" } }, /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#ffffff", fontSize: 18, fontWeight: "bold", marginBottom: 16 } }, "Quick Soundboard Settings"), /* @__PURE__ */ import_common.React.createElement(View, { style: { marginBottom: 20 } }, /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#b9bbbe", fontSize: 14, marginBottom: 8 } }, "Add Sound ID:"), /* @__PURE__ */ import_common.React.createElement(
     TextInput,
     {
       style: {
         backgroundColor: "#202225",
-        color: "#fff",
+        color: "#ffffff",
         padding: 12,
         borderRadius: 8,
         marginBottom: 10,
@@ -105,8 +108,8 @@ function Settings() {
       },
       onPress: handleAddSound
     },
-    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontWeight: "bold" } }, "+ Add Sound")
-  )), /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 10 } }, "Favorites (", typedStorage.favorites.length, ")"), typedStorage.favorites.map((sound, index) => /* @__PURE__ */ import_common.React.createElement(View, { key: index, style: { flexDirection: "row", alignItems: "center", marginBottom: 10 } }, /* @__PURE__ */ import_common.React.createElement(
+    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#ffffff", fontWeight: "bold" } }, "+ Add Sound")
+  )), /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#ffffff", fontSize: 16, fontWeight: "bold", marginBottom: 10 } }, "Favorites (", typedStorage.favorites.length, ")"), typedStorage.favorites.map((sound, index) => /* @__PURE__ */ import_common.React.createElement(View, { key: index, style: { flexDirection: "row", alignItems: "center", marginBottom: 10 } }, /* @__PURE__ */ import_common.React.createElement(
     TouchableOpacity,
     {
       style: {
@@ -118,7 +121,7 @@ function Settings() {
       },
       onPress: () => playSound(sound)
     },
-    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontWeight: "600" } }, "\u25B6 ", sound.name)
+    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#ffffff", fontWeight: "600" } }, "\u25B6 ", sound.name)
   ), /* @__PURE__ */ import_common.React.createElement(
     TouchableOpacity,
     {
@@ -127,21 +130,21 @@ function Settings() {
         typedStorage.favorites.splice(index, 1);
       }
     },
-    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontWeight: "bold" } }, "\u2715")
+    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#ffffff", fontWeight: "bold" } }, "\u2715")
   ))));
 }
 function onLoad() {
   var _a, _b;
-  import_vendetta.logger.log("[Quick Soundboard] Loaded!");
+  import_vendetta.logger.log("[Quick Soundboard] Plugin Loaded Successfully!");
   (_a = typedStorage.enabled) != null ? _a : typedStorage.enabled = true;
   (_b = typedStorage.favorites) != null ? _b : typedStorage.favorites = [];
 }
 function onUnload() {
-  import_vendetta.logger.log("[Quick Soundboard] Unloaded!");
+  import_vendetta.logger.log("[Quick Soundboard] Plugin Unloaded!");
 }
 module.exports = {
   onLoad,
   onUnload,
   playSound,
-  settings: () => Settings()
+  Settings
 };
