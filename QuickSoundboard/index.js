@@ -29,15 +29,11 @@ var import_vendetta = require("@vendetta");
 
 // QuickSoundboard/src/Settings.tsx
 var import_common = require("@vendetta/metro/common");
-var import_components = require("@vendetta/ui/components");
-var import_storage = require("@vendetta/storage");
 var import_plugin = require("@vendetta/plugin");
-var { ScrollView, View } = import_common.ReactNative;
-var { FormSection, FormInput, FormSwitchRow, FormButton, FormText } = import_components.Forms;
+var { ScrollView, View, Text, TextInput, TouchableOpacity } = import_common.ReactNative;
 var typedStorage = import_plugin.storage;
 function Settings() {
   var _a, _b;
-  (0, import_storage.useProxy)(typedStorage);
   (_a = typedStorage.enabled) != null ? _a : typedStorage.enabled = true;
   (_b = typedStorage.favorites) != null ? _b : typedStorage.favorites = [];
   const [soundIdInput, setSoundIdInput] = import_common.React.useState("");
@@ -49,38 +45,59 @@ function Settings() {
     });
     setSoundIdInput("");
   };
-  return /* @__PURE__ */ import_common.React.createElement(ScrollView, { style: { paddingBottom: 24 } }, /* @__PURE__ */ import_common.React.createElement(View, { style: { padding: 16 } }, /* @__PURE__ */ import_common.React.createElement(FormSection, { title: "General Settings" }, /* @__PURE__ */ import_common.React.createElement(
-    FormSwitchRow,
+  return /* @__PURE__ */ import_common.React.createElement(ScrollView, { style: { padding: 16, backgroundColor: "#2f3136" } }, /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 16 } }, "Quick Soundboard (Revenge)"), /* @__PURE__ */ import_common.React.createElement(View, { style: { marginBottom: 20 } }, /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#b9bbbe", fontSize: 14, marginBottom: 8 } }, "Add Sound ID:"), /* @__PURE__ */ import_common.React.createElement(
+    TextInput,
     {
-      label: "Enable Soundboard",
-      subLabel: "Master switch for quick soundboard functionality",
-      value: typedStorage.enabled,
-      onValueChange: (v) => {
-        typedStorage.enabled = v;
-      }
-    }
-  )), /* @__PURE__ */ import_common.React.createElement(FormSection, { title: "Add Favorite Sound" }, /* @__PURE__ */ import_common.React.createElement(
-    FormInput,
-    {
-      title: "Sound ID",
-      placeholder: "Paste Discord Sound ID here",
+      style: {
+        backgroundColor: "#202225",
+        color: "#fff",
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: "#4f545c"
+      },
+      placeholder: "e.g. 1054951789318909972",
+      placeholderTextColor: "#72767d",
       value: soundIdInput,
-      onChange: (v) => setSoundIdInput(v),
+      onChangeText: (v) => setSoundIdInput(v),
       keyboardType: "numeric"
     }
   ), /* @__PURE__ */ import_common.React.createElement(
-    FormButton,
+    TouchableOpacity,
     {
-      text: "Add to Favorites",
+      style: {
+        backgroundColor: "#5865f2",
+        padding: 12,
+        borderRadius: 8,
+        alignItems: "center"
+      },
       onPress: handleAddSound
-    }
-  )), /* @__PURE__ */ import_common.React.createElement(FormSection, { title: `Favorite Sounds (${typedStorage.favorites.length})` }, typedStorage.favorites.length === 0 ? /* @__PURE__ */ import_common.React.createElement(FormText, { style: { padding: 8 } }, "No favorite sounds added yet.") : typedStorage.favorites.map((sound, index) => /* @__PURE__ */ import_common.React.createElement(View, { key: index, style: { marginBottom: 10, flexDirection: "row", alignItems: "center" } }, /* @__PURE__ */ import_common.React.createElement(
-    FormButton,
+    },
+    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontWeight: "bold" } }, "+ Add Sound")
+  )), /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 10 } }, "Favorites (", typedStorage.favorites.length, ")"), typedStorage.favorites.map((sound, index) => /* @__PURE__ */ import_common.React.createElement(View, { key: index, style: { flexDirection: "row", alignItems: "center", marginBottom: 10 } }, /* @__PURE__ */ import_common.React.createElement(
+    TouchableOpacity,
     {
-      text: `\u25B6 Play ${sound.name}`,
+      style: {
+        backgroundColor: "#4f545c",
+        padding: 12,
+        borderRadius: 8,
+        flex: 1,
+        marginRight: 8
+      },
       onPress: () => playSound(sound)
-    }
-  ))))));
+    },
+    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontWeight: "600" } }, "\u25B6 ", sound.name)
+  ), /* @__PURE__ */ import_common.React.createElement(
+    TouchableOpacity,
+    {
+      style: { backgroundColor: "#ed4245", padding: 12, borderRadius: 8 },
+      onPress: () => {
+        typedStorage.favorites.splice(index, 1);
+      }
+    },
+    /* @__PURE__ */ import_common.React.createElement(Text, { style: { color: "#fff", fontWeight: "bold" } }, "\u2715")
+  ))));
 }
 
 // QuickSoundboard/src/index.ts
