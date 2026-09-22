@@ -1,4 +1,4 @@
-name: Build and deploy
+indexxd and deploy
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
           mkdir -p dist/QuickSoundboard
           
           # تجميع الكود بصيغة cjs ودعم ملفات JSX / TSX
-          esbuild QuickSoundboard/src/index.ts \
+          esbuild QuickSoundboard/src/index.tsx \
             --bundle \
             --outfile=dist/QuickSoundboard/index.js \
             --format=cjs \
