@@ -2,7 +2,6 @@ name: Build and deploy
 
 on:
   workflow_dispatch:
-
   push:
     branches: [ main ]
 
@@ -20,18 +19,19 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Install esbuild
-        run: npm install -g esbuild
+      - name: Install esbuild and jq
+        run: sudo apt-get install -y jq && npm install -g esbuild
 
       - name: Build Plugin
         run: |
           mkdir -p dist/QuickSoundboard
           
-          # البناء واستثناء جميع مكتبات vendetta المباشرة والفرعية
+          # 1. تجميع الكود بصيغة iife المناسبة لعملاء ديسكورد
           esbuild QuickSoundboard/src/index.ts \
             --bundle \
             --outfile=dist/QuickSoundboard/index.js \
-            --format=esm \
+            --format=iife \
+            --global-name=QuickSoundboard \
             --target=es2021 \
             --external:@vendetta \
             --external:@vendetta/* \
@@ -40,9 +40,11 @@ jobs:
             --external:react \
             --external:react-native
 
-          # نسخ وتعديل الـ manifest
-          cp QuickSoundboard/manifest.json dist/QuickSoundboard/manifest.json
-          sed -i 's/"src\/index.ts"/"index.js"/g' dist/QuickSoundboard/manifest.json
+          # 2. حساب SHA-256 Hash لملف index.js الناتج (ضروري لبعض نسخ Vendetta)
+          HASH=$(sha256sum dist/QuickSoundboard/index.js | cut -d' ' -f1)
+
+          # 3. تحديث manifest.json وتعديل المسار وإضافة الـ hash
+          jq --arg hash "$HASH" '.main = "index.js" | .hash = $hash' QuickSoundboard/manifest.json > dist/QuickSoundboard/manifest.json
 
       - name: Build 404 page
         run: |
