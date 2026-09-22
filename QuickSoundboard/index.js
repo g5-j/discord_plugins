@@ -27,7 +27,6 @@ var import_metro = require("@vendetta/metro");
 var import_common = require("@vendetta/metro/common");
 var import_plugin = require("@vendetta/plugin");
 var import_vendetta = require("@vendetta");
-var { ScrollView, View, Text, TextInput, TouchableOpacity } = import_common.ReactNative;
 var typedStorage = import_plugin.storage;
 function getCurrentVoiceChannelId() {
   var _a;
@@ -65,6 +64,7 @@ function playSound(sound) {
 }
 function Settings() {
   var _a, _b;
+  const { ScrollView, View, Text, TextInput, TouchableOpacity } = import_common.ReactNative;
   (_a = typedStorage.enabled) != null ? _a : typedStorage.enabled = true;
   (_b = typedStorage.favorites) != null ? _b : typedStorage.favorites = [];
   const [soundIdInput, setSoundIdInput] = import_common.React.useState("");
