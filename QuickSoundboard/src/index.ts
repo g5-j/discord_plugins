@@ -1,7 +1,7 @@
 import { storage } from "@vendetta/plugin";
 import { logger } from "@vendetta";
 import Settings from "./Settings";
-import { playSound, VoiceStateStore, SoundItem } from "./utils";
+import { playSound, getVoiceStateStore, SoundItem } from "./utils";
 
 const typedStorage = storage as typeof storage & {
   enabled: boolean;
@@ -21,11 +21,11 @@ export default {
     logger.log("[Quick Soundboard] Plugin Unloaded.");
   },
 
-  // دالة برمجية لاستدعاء الصوت الأول المفضل
   triggerQuickSound(index = 0) {
     if (!typedStorage.enabled) return;
     
-    const currentChannel = VoiceStateStore.getVoiceChannelId();
+    const VoiceStateStore = getVoiceStateStore();
+    const currentChannel = VoiceStateStore?.getVoiceChannelId();
     if (!currentChannel) {
       logger.warn("[Quick Soundboard] Not connected to any voice channel.");
       return;
