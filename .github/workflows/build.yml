@@ -27,13 +27,15 @@ jobs:
         run: |
           mkdir -p dist/QuickSoundboard
           
-          # البناء من مسار مجلد QuickSoundboard
+          # البناء واستثناء جميع مكتبات vendetta المباشرة والفرعية
           esbuild QuickSoundboard/src/index.ts \
             --bundle \
             --outfile=dist/QuickSoundboard/index.js \
             --format=esm \
             --target=es2021 \
+            --external:@vendetta \
             --external:@vendetta/* \
+            --external:@revenge \
             --external:@revenge/* \
             --external:react \
             --external:react-native
