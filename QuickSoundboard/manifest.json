@@ -1,0 +1,14 @@
+{
+  "name": "Quick Soundboard",
+  "description": "Quickly trigger soundboard sounds in voice channels with a custom overlay.",
+  "authors": [
+    {
+      "name": "ABOOD",
+      "id": "000000000000000000"
+    }
+  ],
+  "main": "index.js",
+  "vendetta": {
+    "icon": "ic_audio_channel"
+  }
+}
