@@ -25,12 +25,12 @@ jobs:
 
       - name: Build Plugin
         run: |
-          mkdir -p dist
+          mkdir -p dist/QuickSoundboard
           
-          # تجميع ملفات TypeScript مباشرة إلى dist/index.js
-          esbuild src/index.ts \
+          # البناء من مسار مجلد QuickSoundboard
+          esbuild QuickSoundboard/src/index.ts \
             --bundle \
-            --outfile=dist/index.js \
+            --outfile=dist/QuickSoundboard/index.js \
             --format=esm \
             --target=es2021 \
             --external:@vendetta/* \
@@ -38,14 +38,14 @@ jobs:
             --external:react \
             --external:react-native
 
-          # نسخ manifest وتعديل المسار ليعمل في البناء
-          cp manifest.json dist/manifest.json
-          sed -i 's/"src\/index.ts"/"index.js"/g' dist/manifest.json
+          # نسخ وتعديل الـ manifest
+          cp QuickSoundboard/manifest.json dist/QuickSoundboard/manifest.json
+          sed -i 's/"src\/index.ts"/"index.js"/g' dist/QuickSoundboard/manifest.json
 
       - name: Build 404 page
         run: |
           printf -- "---\npermalink: /404.html\n---\n" > dist/404.md
-          printf -- "> **Note:** You accessed a link that returned a 404, probably by clicking one of the plugin links. You're supposed to copy the link address and add it into Revenge/Bunny/Vendetta.\n\n" >> dist/404.md
+          printf -- "> **Note:** You accessed a link that returned a 404.\n\n" >> dist/404.md
           if [ -f README.md ]; then cat README.md >> dist/404.md; fi
 
       - name: Deploy to GitHub Pages
