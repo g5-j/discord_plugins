@@ -1,24 +1,28 @@
 import { findByProps } from "@vendetta/metro";
-import { FluxDispatcher, React, ReactNative } from "@vendetta/metro/common";
+import { FluxDispatcher } from "@vendetta/metro/common";
 import { storage } from "@vendetta/plugin";
 import { logger } from "@vendetta";
+import { showToast } from "@vendetta/ui/toasts";
 
 export interface SoundItem {
   soundId: string;
-  name: string;
+  name?: string;
   guildId?: string;
 }
 
-const typedStorage = storage as typeof storage & {
-  enabled: boolean;
-  favorites: SoundItem[];
-};
-
-// ==================== الدوال المساعدة ====================
+// دالة جلب آمنة للموديولات لمنع أي crash أثناء الـ parse
+function safeFindByProps(...props: string[]) {
+  try {
+    return findByProps(...props);
+  } catch (e) {
+    logger.error(`[Quick Soundboard] Failed to find props: ${props.join(", ")}`, e);
+    return null;
+  }
+}
 
 export function getCurrentVoiceChannelId(): string | null {
   try {
-    const VoiceStateStore = findByProps("getVoiceChannelId");
+    const VoiceStateStore = safeFindByProps("getVoiceChannelId");
     return VoiceStateStore?.getVoiceChannelId() ?? null;
   } catch (e) {
     logger.error("[Quick Soundboard] Error fetching voice channel:", e);
@@ -30,11 +34,11 @@ export function playSound(sound: SoundItem): boolean {
   try {
     const currentChannelId = getCurrentVoiceChannelId();
     if (!currentChannelId) {
-      logger.warn("[Quick Soundboard] You must be in a voice channel!");
+      showToast("You must be in a voice channel!", safeFindByProps("getAssetIDByName")?.("Small"));
       return false;
     }
 
-    const ChannelStore = findByProps("getChannel");
+    const ChannelStore = safeFindByProps("getChannel");
     const channel = ChannelStore?.getChannel(currentChannelId);
     const guildId = channel?.guild_id ?? sound.guildId ?? "0";
 
@@ -45,7 +49,6 @@ export function playSound(sound: SoundItem): boolean {
       guildId: guildId,
     });
 
-    logger.log(`[Quick Soundboard] Playing sound: ${sound.name}`);
     return true;
   } catch (e) {
     logger.error("[Quick Soundboard] Failed to play sound:", e);
@@ -53,111 +56,40 @@ export function playSound(sound: SoundItem): boolean {
   }
 }
 
-// ==================== واجهة الإعدادات المصممة لـ Revenge ====================
-
-export function Settings() {
-  const { ScrollView, View, Text, TextInput, TouchableOpacity } = ReactNative;
-
-  typedStorage.enabled ??= true;
-  typedStorage.favorites ??= [];
-
-  const [soundIdInput, setSoundIdInput] = React.useState("");
-
-  const handleAddSound = () => {
-    if (!soundIdInput.trim()) return;
+function onLoad() {
+  try {
+    logger.log("[Quick Soundboard] Plugin Loaded Successfully!");
     
-    typedStorage.favorites.push({
-      soundId: soundIdInput.trim(),
-      name: `Sound #${soundIdInput.trim().slice(-4)}`
-    });
+    // إشعار مرئي على الشاشة للتأكد من أن onLoad عملت بنجاح
+    showToast("Quick Soundboard Activated!", safeFindByProps("getAssetIDByName")?.("Check"));
 
-    setSoundIdInput("");
-  };
-
-  return (
-    <ScrollView style={{ padding: 16, backgroundColor: "#2f3136" }}>
-      <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "bold", marginBottom: 16 }}>
-        Quick Soundboard Settings
-      </Text>
-
-      <View style={{ marginBottom: 20 }}>
-        <Text style={{ color: "#b9bbbe", fontSize: 14, marginBottom: 8 }}>Add Sound ID:</Text>
-        <TextInput
-          style={{
-            backgroundColor: "#202225",
-            color: "#ffffff",
-            padding: 12,
-            borderRadius: 8,
-            marginBottom: 10,
-            borderWidth: 1,
-            borderColor: "#4f545c"
-          }}
-          placeholder="e.g. 1054951789318909972"
-          placeholderTextColor="#72767d"
-          value={soundIdInput}
-          onChangeText={(v: string) => setSoundIdInput(v)}
-          keyboardType="numeric"
-        />
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#5865f2",
-            padding: 12,
-            borderRadius: 8,
-            alignItems: "center"
-          }}
-          onPress={handleAddSound}
-        >
-          <Text style={{ color: "#ffffff", fontWeight: "bold" }}>+ Add Sound</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
-        Favorites ({typedStorage.favorites.length})
-      </Text>
-
-      {typedStorage.favorites.map((sound, index) => (
-        <View key={index} style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#4f545c",
-              padding: 12,
-              borderRadius: 8,
-              flex: 1,
-              marginRight: 8
-            }}
-            onPress={() => playSound(sound)}
-          >
-            <Text style={{ color: "#ffffff", fontWeight: "600" }}>▶ {sound.name}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ backgroundColor: "#ed4245", padding: 12, borderRadius: 8 }}
-            onPress={() => {
-              typedStorage.favorites.splice(index, 1);
-            }}
-          >
-            <Text style={{ color: "#ffffff", fontWeight: "bold" }}>✕</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-    </ScrollView>
-  );
+    if (storage) {
+      const typedStorage = storage as any;
+      typedStorage.enabled ??= true;
+      typedStorage.favorites ??= [];
+    }
+  } catch (err: any) {
+    logger.error("[Quick Soundboard] Error in onLoad:", err);
+  }
 }
 
-// ==================== إقلاع وتصدير البلوقن ====================
-
-export function onLoad() {
-  logger.log("[Quick Soundboard] Plugin Loaded Successfully!");
-  typedStorage.enabled ??= true;
-  typedStorage.favorites ??= [];
+function onUnload() {
+  try {
+    logger.log("[Quick Soundboard] Plugin Unloaded!");
+    showToast("Quick Soundboard Disabled!", safeFindByProps("getAssetIDByName")?.("Small"));
+  } catch (err) {
+    logger.error("[Quick Soundboard] Error in onUnload:", err);
+  }
 }
 
-export function onUnload() {
-  logger.log("[Quick Soundboard] Plugin Unloaded!");
-}
-
-module.exports = {
+// التصدير المزدوج لضمان التوافق مع كافة محركات Revenge / Vendetta / Bunny
+const plugin = {
   onLoad,
   onUnload,
-  playSound,
-  Settings
+  playSound
 };
+
+export { onLoad, onUnload, playSound };
+export default plugin;
+
+module.exports = plugin;
