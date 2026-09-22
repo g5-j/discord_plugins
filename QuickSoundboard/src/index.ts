@@ -2,8 +2,9 @@ import { findByProps } from "@vendetta/metro";
 import { FluxDispatcher } from "@vendetta/metro/common";
 import { storage } from "@vendetta/plugin";
 import { logger } from "@vendetta";
+import Settings from "./Settings";
 
-interface SoundItem {
+export interface SoundItem {
   soundId: string;
   name: string;
   guildId?: string;
@@ -14,13 +15,16 @@ const typedStorage = storage as typeof storage & {
   favorites: SoundItem[];
 };
 
-function playSound(sound: SoundItem) {
+export function playSound(sound: SoundItem) {
   try {
     const VoiceStateStore = findByProps("getVoiceChannelId");
     const ChannelStore = findByProps("getChannel");
 
     const currentChannelId = VoiceStateStore?.getVoiceChannelId();
-    if (!currentChannelId) return false;
+    if (!currentChannelId) {
+      logger.warn("[Quick Soundboard] You must be in a voice channel!");
+      return false;
+    }
 
     const channel = ChannelStore?.getChannel(currentChannelId);
     const guildId = channel?.guild_id ?? sound.guildId ?? "0";
@@ -49,9 +53,9 @@ function onUnload() {
   logger.log("[Quick Soundboard] Plugin Unloaded.");
 }
 
-// التصدير المباشر المتوافق مع Vendetta/Revenge
 module.exports = {
   onLoad,
   onUnload,
-  playSound
+  playSound,
+  settings: Settings
 };
