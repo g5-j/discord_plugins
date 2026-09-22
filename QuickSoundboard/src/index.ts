@@ -14,7 +14,7 @@ const typedStorage = storage as typeof storage & {
   favorites: SoundItem[];
 };
 
-export function playSound(sound: SoundItem) {
+function playSound(sound: SoundItem) {
   try {
     const VoiceStateStore = findByProps("getVoiceChannelId");
     const ChannelStore = findByProps("getChannel");
@@ -39,14 +39,19 @@ export function playSound(sound: SoundItem) {
   }
 }
 
-export default {
-  onLoad() {
-    logger.log("[Quick Soundboard] Plugin Loaded Successfully.");
-    typedStorage.enabled ??= true;
-    typedStorage.favorites ??= [];
-  },
+function onLoad() {
+  logger.log("[Quick Soundboard] Plugin Loaded Successfully.");
+  typedStorage.enabled ??= true;
+  typedStorage.favorites ??= [];
+}
 
-  onUnload() {
-    logger.log("[Quick Soundboard] Plugin Unloaded.");
-  }
+function onUnload() {
+  logger.log("[Quick Soundboard] Plugin Unloaded.");
+}
+
+// التصدير المباشر المتوافق مع Vendetta/Revenge
+module.exports = {
+  onLoad,
+  onUnload,
+  playSound
 };
