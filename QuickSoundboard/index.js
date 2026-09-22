@@ -36,9 +36,10 @@ var { ScrollView, View } = import_common.ReactNative;
 var { FormSection, FormInput, FormSwitchRow, FormButton, FormText } = import_components.Forms;
 var typedStorage = import_plugin.storage;
 function Settings() {
+  var _a, _b;
   (0, import_storage.useProxy)(typedStorage);
-  typedStorage.enabled ??= true;
-  typedStorage.favorites ??= [];
+  (_a = typedStorage.enabled) != null ? _a : typedStorage.enabled = true;
+  (_b = typedStorage.favorites) != null ? _b : typedStorage.favorites = [];
   const [soundIdInput, setSoundIdInput] = import_common.React.useState("");
   const handleAddSound = () => {
     if (!soundIdInput.trim()) return;
@@ -85,16 +86,17 @@ function Settings() {
 // QuickSoundboard/src/index.ts
 var typedStorage2 = import_plugin2.storage;
 function playSound(sound) {
+  var _a, _b;
   try {
     const VoiceStateStore = (0, import_metro.findByProps)("getVoiceChannelId");
     const ChannelStore = (0, import_metro.findByProps)("getChannel");
-    const currentChannelId = VoiceStateStore?.getVoiceChannelId();
+    const currentChannelId = VoiceStateStore == null ? void 0 : VoiceStateStore.getVoiceChannelId();
     if (!currentChannelId) {
       import_vendetta.logger.warn("[Quick Soundboard] You must be in a voice channel!");
       return false;
     }
-    const channel = ChannelStore?.getChannel(currentChannelId);
-    const guildId = channel?.guild_id ?? sound.guildId ?? "0";
+    const channel = ChannelStore == null ? void 0 : ChannelStore.getChannel(currentChannelId);
+    const guildId = (_b = (_a = channel == null ? void 0 : channel.guild_id) != null ? _a : sound.guildId) != null ? _b : "0";
     import_common2.FluxDispatcher.dispatch({
       type: "GUILD_SOUNDBOARD_SOUND_PLAY_START",
       soundId: sound.soundId,
@@ -108,9 +110,10 @@ function playSound(sound) {
   }
 }
 function onLoad() {
+  var _a, _b;
   import_vendetta.logger.log("[Quick Soundboard] Plugin Loaded Successfully.");
-  typedStorage2.enabled ??= true;
-  typedStorage2.favorites ??= [];
+  (_a = typedStorage2.enabled) != null ? _a : typedStorage2.enabled = true;
+  (_b = typedStorage2.favorites) != null ? _b : typedStorage2.favorites = [];
 }
 function onUnload() {
   import_vendetta.logger.log("[Quick Soundboard] Plugin Unloaded.");
