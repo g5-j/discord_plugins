@@ -26,14 +26,11 @@ jobs:
         run: |
           mkdir -p dist/QuickSoundboard
           
-          # تجميع الكود بصيغة cjs ودعم ملفات JSX / TSX
           esbuild QuickSoundboard/src/index.tsx \
             --bundle \
             --outfile=dist/QuickSoundboard/index.js \
             --format=cjs \
             --target=es2018 \
-            --jsx=transform \
-            --loader:.tsx=tsx \
             --external:@vendetta \
             --external:@vendetta/* \
             --external:@revenge \
@@ -41,10 +38,7 @@ jobs:
             --external:react \
             --external:react-native
 
-          # حساب SHA-256 Hash لملف index.js الناتج
           HASH=$(sha256sum dist/QuickSoundboard/index.js | cut -d' ' -f1)
-
-          # تحديث manifest.json وتعديل المسار وإضافة الـ hash
           jq --arg hash "$HASH" '.main = "index.js" | .hash = $hash' QuickSoundboard/manifest.json > dist/QuickSoundboard/manifest.json
 
       - name: Build 404 page
