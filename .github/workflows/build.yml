@@ -1,0 +1,37 @@
+name: Build and Deploy Vendetta Plugin
+
+on:
+  push:
+    branches:
+      - main # أو master حسب اسم الفرع الرئيسي لديك
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-policy: '18'
+
+      - name: Install Dependencies
+        run: |
+          npm install -g rollup @vendetta/cli
+          npm install
+
+      - name: Build Plugin
+        run: |
+          npx vendetta-cli build --entry QuickSoundboard/src/index.ts --output QuickSoundboard/index.js
+
+      - name: Update Manifest Main File
+        run: |
+          sed -i 's/"src\/index.ts"/"index.js"/g' QuickSoundboard/manifest.json
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
