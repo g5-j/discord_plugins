@@ -1,37 +1,58 @@
-name: Build and Deploy Vendetta Plugin
+name: Build and deploy
 
 on:
+  workflow_dispatch:
+
   push:
-    branches:
-      - main # أو master حسب اسم الفرع الرئيسي لديك
+    branches: [ main ]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Prepare environment
+        uses: actions/setup-node@v4
         with:
-          node-policy: '18'
+          node-version: "18"
 
-      - name: Install Dependencies
+      - name: Install esbuild
+        run: npm install -g esbuild
+
+      - name: Build QuickSoundboard Plugin
         run: |
-          npm install -g rollup @vendetta/cli
-          npm install
+          # إنشاء مجلد dist والإخراج المطلوب
+          mkdir -p dist/QuickSoundboard
+          
+          # تجميع ملفات TypeScript إلى index.js
+          esbuild QuickSoundboard/src/index.ts \
+            --bundle \
+            --outfile=dist/QuickSoundboard/index.js \
+            --format=esm \
+            --target=es2021 \
+            --external:@vendetta/* \
+            --external:@revenge/* \
+            --external:react \
+            --external:react-native
 
-      - name: Build Plugin
+          # نسخ ملف manifest وتحديث الإدخال ليكون index.js
+          cp QuickSoundboard/manifest.json dist/QuickSoundboard/manifest.json
+          sed -i 's/"src\/index.ts"/"index.js"/g' dist/QuickSoundboard/manifest.json
+
+      - name: Build 404 page
         run: |
-          npx vendetta-cli build --entry QuickSoundboard/src/index.ts --output QuickSoundboard/index.js
+          printf -- "---\npermalink: /404.html\n---\n" > dist/404.md
+          printf -- "> **Note:** You accessed a link that returned a 404, probably by clicking one of the plugin links. You're supposed to copy the link address and add it into Revenge/Bunny/Vendetta.\n\n" >> dist/404.md
+          if [ -f README.md ]; then cat README.md >> dist/404.md; fi
 
-      - name: Update Manifest Main File
-        run: |
-          sed -i 's/"src\/index.ts"/"index.js"/g' QuickSoundboard/manifest.json
-
+      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          publish_dir: ./dist
+          enable_jekyll: true
