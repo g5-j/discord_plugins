@@ -1,11 +1,8 @@
 import { React, ReactNative } from "@vendetta/metro/common";
-import { Forms } from "@vendetta/ui/components";
-import { useProxy } from "@vendetta/storage";
 import { storage } from "@vendetta/plugin";
 import { playSound, SoundItem } from "./index";
 
-const { ScrollView, View } = ReactNative;
-const { FormSection, FormInput, FormSwitchRow, FormButton, FormText } = Forms;
+const { ScrollView, View, Text, TextInput, TouchableOpacity } = ReactNative;
 
 const typedStorage = storage as typeof storage & {
   enabled: boolean;
@@ -13,9 +10,6 @@ const typedStorage = storage as typeof storage & {
 };
 
 export default function Settings() {
-  useProxy(typedStorage);
-
-  // إعداد القيمة الافتراضية إذا كانت فارغة
   typedStorage.enabled ??= true;
   typedStorage.favorites ??= [];
 
@@ -33,48 +27,70 @@ export default function Settings() {
   };
 
   return (
-    <ScrollView style={{ paddingBottom: 24 }}>
-      <View style={{ padding: 16 }}>
-        <FormSection title="General Settings">
-          <FormSwitchRow
-            label="Enable Soundboard"
-            subLabel="Master switch for quick soundboard functionality"
-            value={typedStorage.enabled}
-            onValueChange={(v: boolean) => {
-              typedStorage.enabled = v;
-            }}
-          />
-        </FormSection>
+    <ScrollView style={{ padding: 16, backgroundColor: "#2f3136" }}>
+      <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold", marginBottom: 16 }}>
+        Quick Soundboard (Revenge)
+      </Text>
 
-        <FormSection title="Add Favorite Sound">
-          <FormInput
-            title="Sound ID"
-            placeholder="Paste Discord Sound ID here"
-            value={soundIdInput}
-            onChange={(v: string) => setSoundIdInput(v)}
-            keyboardType="numeric"
-          />
-          <FormButton
-            text="Add to Favorites"
-            onPress={handleAddSound}
-          />
-        </FormSection>
-
-        <FormSection title={`Favorite Sounds (${typedStorage.favorites.length})`}>
-          {typedStorage.favorites.length === 0 ? (
-            <FormText style={{ padding: 8 }}>No favorite sounds added yet.</FormText>
-          ) : (
-            typedStorage.favorites.map((sound, index) => (
-              <View key={index} style={{ marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
-                <FormButton
-                  text={`▶ Play ${sound.name}`}
-                  onPress={() => playSound(sound)}
-                />
-              </View>
-            ))
-          )}
-        </FormSection>
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ color: "#b9bbbe", fontSize: 14, marginBottom: 8 }}>Add Sound ID:</Text>
+        <TextInput
+          style={{
+            backgroundColor: "#202225",
+            color: "#fff",
+            padding: 12,
+            borderRadius: 8,
+            marginBottom: 10,
+            borderWidth: 1,
+            borderColor: "#4f545c"
+          }}
+          placeholder="e.g. 1054951789318909972"
+          placeholderTextColor="#72767d"
+          value={soundIdInput}
+          onChangeText={(v: string) => setSoundIdInput(v)}
+          keyboardType="numeric"
+        />
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#5865f2",
+            padding: 12,
+            borderRadius: 8,
+            alignItems: "center"
+          }}
+          onPress={handleAddSound}
+        >
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>+ Add Sound</Text>
+        </TouchableOpacity>
       </View>
+
+      <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
+        Favorites ({typedStorage.favorites.length})
+      </Text>
+
+      {typedStorage.favorites.map((sound, index) => (
+        <View key={index} style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#4f545c",
+              padding: 12,
+              borderRadius: 8,
+              flex: 1,
+              marginRight: 8
+            }}
+            onPress={() => playSound(sound)}
+          >
+            <Text style={{ color: "#fff", fontWeight: "600" }}>▶ {sound.name}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ backgroundColor: "#ed4245", padding: 12, borderRadius: 8 }}
+            onPress={() => {
+              typedStorage.favorites.splice(index, 1);
+            }}
+          >
+            <Text style={{ color: "#fff", fontWeight: "bold" }}>✕</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
     </ScrollView>
   );
 }
