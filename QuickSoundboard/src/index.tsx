@@ -10,7 +10,6 @@ export interface SoundItem {
   guildId?: string;
 }
 
-// دالة جلب آمنة للموديولات لمنع أي crash أثناء الـ parse
 function safeFindByProps(...props: string[]) {
   try {
     return findByProps(...props);
@@ -20,7 +19,7 @@ function safeFindByProps(...props: string[]) {
   }
 }
 
-export function getCurrentVoiceChannelId(): string | null {
+function getCurrentVoiceChannelId(): string | null {
   try {
     const VoiceStateStore = safeFindByProps("getVoiceChannelId");
     return VoiceStateStore?.getVoiceChannelId() ?? null;
@@ -30,7 +29,7 @@ export function getCurrentVoiceChannelId(): string | null {
   }
 }
 
-export function playSound(sound: SoundItem): boolean {
+function playSound(sound: SoundItem): boolean {
   try {
     const currentChannelId = getCurrentVoiceChannelId();
     if (!currentChannelId) {
@@ -60,7 +59,6 @@ function onLoad() {
   try {
     logger.log("[Quick Soundboard] Plugin Loaded Successfully!");
     
-    // إشعار مرئي على الشاشة للتأكد من أن onLoad عملت بنجاح
     showToast("Quick Soundboard Activated!", safeFindByProps("getAssetIDByName")?.("Check"));
 
     if (storage) {
@@ -82,14 +80,9 @@ function onUnload() {
   }
 }
 
-// التصدير المزدوج لضمان التوافق مع كافة محركات Revenge / Vendetta / Bunny
-const plugin = {
+// التصدير بنظام CommonJS الخالص بدون أي كلمة export ثانية
+module.exports = {
   onLoad,
   onUnload,
   playSound
 };
-
-export { onLoad, onUnload, playSound };
-export default plugin;
-
-module.exports = plugin;
