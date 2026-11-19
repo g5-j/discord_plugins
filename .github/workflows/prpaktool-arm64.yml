@@ -92,6 +92,8 @@ jobs:
           set -euxo pipefail
           git clone --depth 1 --branch openssl-3.3.2 https://github.com/openssl/openssl.git openssl-src
           cd openssl-src
+          export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
+          export PATH="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
           ./Configure android-arm64 no-shared no-tests
           make -j2 build_libs
           mkdir -p "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/openssl"
