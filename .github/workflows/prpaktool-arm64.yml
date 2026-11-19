@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-arm64:
@@ -153,3 +153,13 @@ jobs:
           path: PRPakTool-Android-arm64
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish public download release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: prpaktool-arm64-latest
+          name: PRPakTool Android ARM64 (latest build)
+          prerelease: true
+          make_latest: false
+          files: PRPakTool-Android-arm64
+          overwrite_files: true
