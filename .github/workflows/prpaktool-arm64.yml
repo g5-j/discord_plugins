@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - work/prpaktool-arm64
-    paths:
-      - .github/workflows/prpaktool-arm64.yml
   workflow_dispatch:
 
 permissions:
