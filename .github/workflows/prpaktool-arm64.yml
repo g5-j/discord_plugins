@@ -54,6 +54,37 @@ jobs:
           assert old in s, "ReadBuffer source pattern not found"
           p.write_text(s.replace(old, new, 1))
 
+          # Fix upstream: 777 decimal is not 0777 octal.
+          old = "return __mkdir(_Path, 777);"
+          assert old in s, "CreateDir mode source pattern not found"
+          s = s.replace(old, "return __mkdir(_Path, 0777);", 1)
+          p.write_text(s)
+
+          p = Path("Src/jni/EntryPoint/PR_Pak_Tool.cpp")
+          s = p.read_text(encoding="utf-8-sig")
+          old = """\tif (Request == UserRequest::UNPACK_PAK)
+          {
+          \t\tif ((!uOutputPath || !Utils::IO::CreateDirRecusive(uOutputPath, '/')) ||"""
+          new = """\tif (Request == UserRequest::UNPACK_PAK)
+          {
+          \t\t// CreateDirRecusive needs a trailing slash to create the final directory.
+          \t\tif (uOutputPath)
+          \t\t{
+          \t\t\tsize_t OutputPathLen = strlen(uOutputPath);
+          \t\t\tif (OutputPathLen > 0 && uOutputPath[OutputPathLen - 1] != '/')
+          \t\t\t{
+          \t\t\t\tchar* FixedOutputPath = (char*)Utils::Memory::AllocMem(OutputPathLen + 2);
+          \t\t\t\tif (!FixedOutputPath) return EXIT_FAILURE;
+          \t\t\t\tmemcpy(FixedOutputPath, uOutputPath, OutputPathLen);
+          \t\t\t\tFixedOutputPath[OutputPathLen] = '/';
+          \t\t\t\tFixedOutputPath[OutputPathLen + 1] = '\0';
+          \t\t\t\tuOutputPath = FixedOutputPath;
+          \t\t\t}
+          \t\t}
+          \t\tif ((!uOutputPath || !Utils::IO::CreateDirRecusive(uOutputPath, '/')) ||"""
+          assert old in s, "Output directory setup source pattern not found"
+          p.write_text(s.replace(old, new, 1), encoding="utf-8")
+
           p = Path("Src/jni/Macros.h")
           s = p.read_text()
           old = "#define offset_of(s,m) ((unsigned int)&(((s*)0)->m))"
