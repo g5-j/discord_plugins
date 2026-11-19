@@ -60,57 +60,35 @@ jobs:
           assert old in s, "CreateDir mode source pattern not found"
           s = s.replace(old, "return __mkdir(_Path, 0777);", 1)
 
-          old_func = """\t\tstatic bool CreateDirRecusive(const char* _Path, const char Delimiter)
-          \t\t{
-          \t\t\tstatic C_Array<char> TempPath; //clear? whatever
-          \t\t\tTempPath.resize(0);
-          \t\t\tauto last_slash = strrchr(_Path+1, Delimiter);
-          \t\t\t
-          \t\t\tauto Path_Len = last_slash != NULL ? (last_slash - _Path) + 1 : Text::GetStringLength(_Path);
-          \t\t\tif (Path_Len <= 0) return false;
-          \t\t\tTempPath.assign((char*)_Path, Path_Len+1);
-          \t\t\tTempPath[TempPath.size()-1] = '\\0';
-          \t\t\t
-          \t\t\tif (isDirExists(TempPath.data()))
-          \t\t\t\treturn true;
-          \t\t\t
-          \t\t\tuint32_t Index = 0;
-          \t\t\twhile (++Index < TempPath.size())
-          \t\t\t{
-          \t\t\t\tif (TempPath.data()[Index] != Delimiter) continue;
-          \t\t\t\t
-          \t\t\t\tTempPath.data()[Index] = '\\0';//Null Terminator
-          \t\t\t\tCreateDir(TempPath.data());
-          \t\t\t\tTempPath.data()[Index] = Delimiter;
-          \t\t\t}
-          \t\t\t
-          \t\t\treturn isDirExists(TempPath.data());
-          \t\t}"""
+          pattern = r"static bool CreateDirRecusive\\(const char\\* _Path, const char Delimiter\\)\\s*\\{.*?\\n\\s*\\}"
           new_func = """\t\tstatic bool CreateDirRecusive(const char* _Path, const char Delimiter)
-          \t\t{
-          \t\t\tif (!_Path || !_Path[0]) return false;
-          \t\t\tstatic C_Array<char> TempPath;
-          \t\t\tconst size_t pathLen = strlen(_Path);
-          \t\t\tif (pathLen == 0) return false;
-          \t\t\tTempPath.assign((char*)_Path, pathLen + 1);
-          \t\t\twhile (pathLen > 1 && TempPath[pathLen - 1] == Delimiter)
-          \t\t\t\tTempPath[--pathLen] = '\\0';
-          \t\t\tfor (size_t i = 1; i <= pathLen; ++i)
-          \t\t\t{
-          \t\t\t\tif (i != pathLen && TempPath[i] != Delimiter) continue;
-          \t\t\t\tconst char saved = TempPath[i];
-          \t\t\t\tTempPath[i] = '\\0';
-          \t\t\t\tif (TempPath[0] != '\\0' && !isDirExists(TempPath.data()))
-          \t\t\t\t{
-          \t\t\t\t\tCreateDir(TempPath.data());
-          \t\t\t\t\tif (!isDirExists(TempPath.data())) return false;
-          \t\t\t\t}
-          \t\t\t\tTempPath[i] = saved;
-          \t\t\t}
-          \t\t\treturn isDirExists(TempPath.data());
-          \t\t}"""
-          assert old_func in s, "CreateDirRecusive implementation not found for replacement"
-          s = s.replace(old_func, new_func, 1)
+          {
+              if (!_Path || !_Path[0]) return false;
+              static C_Array<char> TempPath;
+              size_t pathLen = strlen(_Path);
+              TempPath.assign((char*)_Path, pathLen + 1);
+
+              while (pathLen > 1 && TempPath[pathLen - 1] == Delimiter)
+                  TempPath[--pathLen] = '\\0';
+
+              for (size_t i = 1; i <= pathLen; ++i)
+              {
+                  if (i != pathLen && TempPath[i] != Delimiter) continue;
+                  char saved = TempPath[i];
+                  TempPath[i] = '\\0';
+
+                  if (TempPath[0] != '\\0' && !isDirExists(TempPath.data()))
+                  {
+                      CreateDir(TempPath.data());
+                      if (!isDirExists(TempPath.data())) return false;
+                  }
+
+                  TempPath[i] = saved;
+              }
+              return isDirExists(TempPath.data());
+          }"""
+          s, count = re.subn(pattern, lambda m: new_func, s, count=1, flags=re.S)
+          assert count == 1, "CreateDirRecusive function pattern not found"
           p.write_text(s)
 
           p = Path("Src/jni/EntryPoint/PR_Pak_Tool.cpp")
