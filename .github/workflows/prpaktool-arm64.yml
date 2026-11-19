@@ -94,7 +94,7 @@ jobs:
           cd openssl-src
           export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
           export PATH="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
-          ./Configure android-arm64 no-shared no-tests no-ui-console no-cmp no-engine
+          ./Configure android-arm64 no-shared no-tests no-ui-console no-stdio no-cmp no-engine
           make -j2 build_libs
           mkdir -p "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/openssl"
           cp libcrypto.a "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/openssl/"
