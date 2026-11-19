@@ -31,8 +31,7 @@ jobs:
           echo "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
 
       - name: Fetch PR-Pak-Tool source
-        run: |
-          git clone --depth 1 https://github.com/0xPrince/PR-Pak-Tool.git prpak-src
+        run: git clone --depth 1 https://github.com/0xPrince/PR-Pak-Tool.git prpak-src
 
       - name: Patch Android and ARM64 compatibility
         working-directory: prpak-src
@@ -40,11 +39,12 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           p = Path("Src/jni/Utils/Utils.h")
           s = p.read_text()
           old = "return *(type*)(src);"
-          new = "type value{};\\n\\t\\t\\tMemCopy(&value, src, sizeof(type));\\n\\t\\t\\treturn value;"
+          new = "type value{};\n\t\t\tMemCopy(&value, src, sizeof(type));\n\t\t\treturn value;"
           assert old in s, "ReadBuffer source pattern not found"
           p.write_text(s.replace(old, new, 1))
 
@@ -53,18 +53,9 @@ jobs:
           old = "#define offset_of(s,m) ((unsigned int)&(((s*)0)->m))"
           assert old in s, "offset_of source pattern not found"
           s = s.replace(old, "#define offset_of(s,m) __builtin_offsetof(s,m)", 1)
-          old_assert = """#include <assert.h>
-          #define __ASSERT(expression,msg) (void)(                                                       \\
-                      (!!(expression)) ||                                                              \\
-                      (_wassert(_CRT_WIDE(#expression), _CRT_WIDE(#msg), (unsigned)(__LINE__)), 0))"""
-          if old_assert not in s:
-              # Normalize the source block independent of whitespace.
-              import re
-              pattern = r'#include <assert\\.h>\\s*#define __ASSERT\\(expression,msg\\).*?\\(unsigned\\)\\(__LINE__\\)\\), 0\\)\\)'
-              s, count = re.subn(pattern, '#include <assert.h>\\n#define __ASSERT(expression,msg) assert(expression)', s, count=1, flags=re.S)
-              assert count == 1, "Windows-only __ASSERT implementation not found"
-          else:
-              s = s.replace(old_assert, "#include <assert.h>\\n#define __ASSERT(expression,msg) assert(expression)", 1)
+          pattern = r'#include <assert\.h>\s*#define __ASSERT\(expression,msg\).*?_CRT_WIDE\(#msg\).*?\(unsigned\)\(__LINE__\).*?\)\)'
+          s, count = re.subn(pattern, '#include <assert.h>\n#define __ASSERT(expression,msg) assert(expression)', s, count=1, flags=re.S)
+          assert count == 1, "Windows-only __ASSERT implementation not found"
           p.write_text(s)
 
           p = Path("Src/jni/EntryPoint/Handler/PakHandler.hpp")
@@ -80,8 +71,8 @@ jobs:
 
           p = Path("Src/jni/Android.mk")
           s = p.read_text()
-          start = s.index("include $(CLEAR_VARS)\\nLOCAL_MODULE := liboo2core")
-          end = s.index("include $(CLEAR_VARS)\\nLOCAL_MODULE := libzlib", start)
+          start = s.index("include $(CLEAR_VARS)\nLOCAL_MODULE := liboo2core")
+          end = s.index("include $(CLEAR_VARS)\nLOCAL_MODULE := libzlib", start)
           s = s[:start] + s[end:]
           s = s.replace("LOCAL_CPPFLAGS += -pie -fPIE", "LOCAL_CPPFLAGS += -DNO_OODLE -pie -fPIE")
           s = s.replace("LOCAL_STATIC_LIBRARIES := libcrypto liboo2core libzlib libzstd",
@@ -90,49 +81,46 @@ jobs:
           PY
 
       - name: Build OpenSSL for Android ARM64
-        working-directory: prpak-src
         shell: bash
         run: |
           set -euxo pipefail
-          git clone --depth 1 --branch openssl-3.3.2 https://github.com/openssl/openssl.git ../openssl-src
-          cd ../openssl-src
-          ./Configure android-arm64 no-shared no-tests --prefix="$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/openssl/install"
+          git clone --depth 1 --branch openssl-3.3.2 https://github.com/openssl/openssl.git openssl-src
+          cd openssl-src
+          ./Configure android-arm64 no-shared no-tests
           make -j2 build_libs
           mkdir -p "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/openssl"
           cp libcrypto.a "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/openssl/"
           cp -a include/openssl "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/"
 
       - name: Build zlib for Android ARM64
-        working-directory: prpak-src
         shell: bash
         run: |
           set -euxo pipefail
-          git clone --depth 1 --branch v1.3.1 https://github.com/madler/zlib.git ../zlib-src
-          cd ../zlib-src
+          git clone --depth 1 --branch v1.3.1 https://github.com/madler/zlib.git zlib-src
+          cd zlib-src
           export CC="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
           export AR="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
           export RANLIB="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib"
-          ./configure --static --prefix="$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/zlib/install"
+          ./configure --static
           make -j2
           mkdir -p "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/zlib"
           cp libz.a "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/lib/arm64-v8a/zlib/libzlib.a"
           cp zlib.h zconf.h "$GITHUB_WORKSPACE/prpak-src/Src/jni/include/"
 
       - name: Build Zstandard for Android ARM64
-        working-directory: prpak-src
         shell: bash
         run: |
           set -euxo pipefail
-          git clone --depth 1 --branch v1.5.6 https://github.com/facebook/zstd.git ../zstd-src
-          cmake -S ../zstd-src/build/cmake -B ../zstd-build \
+          git clone --depth 1 --branch v1.5.6 https://github.com/facebook/zstd.git zstd-src
+          cmake -S zstd-src/build/cmake -B zstd-build \
             -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-21 \
             -DZSTD_BUILD_SHARED=OFF -DZSTD_BUILD_STATIC=ON \
             -DZSTD_BUILD_PROGRAMS=OFF -DZSTD_BUILD_TESTS=OFF
-          cmake --build ../zstd-build --config Release -j2
-          mkdir -p Src/jni/include/lib/arm64-v8a/zstd
-          find ../zstd-build -name 'libzstd.a' -exec cp {} Src/jni/include/lib/arm64-v8a/zstd/libzstd.a \\;
-          cp ../zstd-src/lib/zstd.h ../zstd-src/lib/zstd_errors.h Src/jni/include/
+          cmake --build zstd-build --config Release -j2
+          mkdir -p prpak-src/Src/jni/include/lib/arm64-v8a/zstd
+          find zstd-build -name 'libzstd.a' -exec cp {} prpak-src/Src/jni/include/lib/arm64-v8a/zstd/libzstd.a \;
+          cp zstd-src/lib/zstd.h zstd-src/lib/zstd_errors.h prpak-src/Src/jni/include/
 
       - name: Compile PR Pak Tool
         working-directory: prpak-src
@@ -146,7 +134,7 @@ jobs:
             NDK_OUT="$RUNNER_TEMP/obj" \
             NDK_LIBS_OUT="$RUNNER_TEMP/libs" \
             V=1
-          find "$RUNNER_TEMP/libs" -type f -name PRPakTool -exec cp {} "$GITHUB_WORKSPACE/PRPakTool-Android-arm64" \\;
+          find "$RUNNER_TEMP/libs" -type f -name PRPakTool -exec cp {} "$GITHUB_WORKSPACE/PRPakTool-Android-arm64" \;
           test -s "$GITHUB_WORKSPACE/PRPakTool-Android-arm64"
           file "$GITHUB_WORKSPACE/PRPakTool-Android-arm64"
 
