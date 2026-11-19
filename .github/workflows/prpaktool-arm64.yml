@@ -60,7 +60,22 @@ jobs:
           assert old in s, "CreateDir mode source pattern not found"
           s = s.replace(old, "return __mkdir(_Path, 0777);", 1)
 
-          pattern = r"static bool CreateDirRecusive\\(const char\\* _Path, const char Delimiter\\)\\s*\\{.*?\\n\\s*\\}"
+          marker = "static bool CreateDirRecusive("
+          start = s.find(marker)
+          assert start >= 0, "CreateDirRecusive function start not found"
+          brace_start = s.find("{", start)
+          assert brace_start >= 0, "CreateDirRecusive opening brace not found"
+          depth = 0
+          end = None
+          for i in range(brace_start, len(s)):
+              if s[i] == "{":
+                  depth += 1
+              elif s[i] == "}":
+                  depth -= 1
+                  if depth == 0:
+                      end = i + 1
+                      break
+          assert end is not None, "CreateDirRecusive closing brace not found"
           new_func = """\t\tstatic bool CreateDirRecusive(const char* _Path, const char Delimiter)
           {
               if (!_Path || !_Path[0]) return false;
@@ -87,8 +102,7 @@ jobs:
               }
               return isDirExists(TempPath.data());
           }"""
-          s, count = re.subn(pattern, lambda m: new_func, s, count=1, flags=re.S)
-          assert count == 1, "CreateDirRecusive function pattern not found"
+          s = s[:start] + new_func + s[end:]
           p.write_text(s)
 
           p = Path("Src/jni/EntryPoint/PR_Pak_Tool.cpp")
