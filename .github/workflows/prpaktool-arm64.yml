@@ -58,7 +58,7 @@ jobs:
           s = p.read_text()
           old = "#define offset_of(s,m) ((unsigned int)&(((s*)0)->m))"
           assert old in s, "offset_of source pattern not found"
-          s = s.replace(old, "#define offset_of(s,m) __builtin_offsetof(s,m)", 1)
+          s = s.replace(old, "#define offset_of(s,m) ((size_t)&(((s*)0)->m))", 1)
           pattern = r'#include <assert\.h>\s*#define __ASSERT\(expression,msg\).*?_CRT_WIDE\(#msg\).*?\(unsigned\)\(__LINE__\).*?\)\)'
           s, count = re.subn(pattern, '#include <assert.h>\n#define __ASSERT(expression,msg) assert(expression)', s, count=1, flags=re.S)
           assert count == 1, "Windows-only __ASSERT implementation not found"
